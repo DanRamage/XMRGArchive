@@ -2,14 +2,8 @@ import os
 import logging.config
 import subprocess
 
-def check_mount_exists(mount_point):
+def test_docker_host_volumn(mount_point):
     logger = logging.getLogger()
-    # Check if the mount point exists
-    logger.info(f"Checking if {mount_point} is a valid mount point.")
-    if not os.path.ismount(mount_point):
-        logger.error(f"{mount_point} is not a valid mount point.")
-        return False
-
     # Try accessing the mount point
     try:
         test_file = os.path.join(mount_point, '.nfs_test_file')
@@ -20,7 +14,16 @@ def check_mount_exists(mount_point):
         return True
     except Exception as e:
         logger.error(f"Failed to access {mount_point}: {e}")
+    return False
+
+def check_mount_exists(mount_point):
+    logger = logging.getLogger()
+    # Check if the mount point exists
+    logger.info(f"Checking if {mount_point} is a valid mount point.")
+    if not os.path.ismount(mount_point):
+        logger.error(f"{mount_point} is not a valid mount point.")
         return False
+    return test_docker_host_volumn(mount_point)
 
 
 def mount_nfs(server, remote_path, local_mount_point):
