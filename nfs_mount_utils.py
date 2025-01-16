@@ -4,16 +4,17 @@ import subprocess
 
 def test_docker_host_volume(mount_point):
     logger = logging.getLogger()
+    logger.info(f"Checking if {mount_point} is writable.")
     # Try accessing the mount point
     try:
         test_file = os.path.join(mount_point, '.nfs_test_file')
         with open(test_file, 'w') as f:
             f.write('test')
         os.remove(test_file)
-        logger.info(f"{mount_point} is a valid NFS mount.")
+        logger.info(f"{mount_point} is a writable.")
         return True
     except Exception as e:
-        logger.error(f"Failed to access {mount_point}: {e}")
+        logger.error(f"Failed to write test file to {mount_point}: {e}")
     return False
 
 def check_mount_exists(mount_point):
