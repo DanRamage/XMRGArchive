@@ -8,7 +8,10 @@ from datetime import datetime, timedelta
 from dateutil.parser import parse as du_parse
 from nfs_mount_utils import check_mount_exists, mount_nfs
 from archive_utilities import xmrg_archive_utilities
+
 SCRIPT_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
+LOGFILES_DIRECTORY = ".\logfiles"
+
 
 import sys
 sys.path.append("./debug/pydevd-pycharm.egg")
