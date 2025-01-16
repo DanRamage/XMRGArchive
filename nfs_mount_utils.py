@@ -5,6 +5,7 @@ import subprocess
 def check_mount_exists(mount_point):
     logger = logging.getLogger()
     # Check if the mount point exists
+    logger.info(f"Checking if {mount_point} is a valid mount point.")
     if not os.path.ismount(mount_point):
         logger.error(f"{mount_point} is not a valid mount point.")
         return False
