@@ -4,6 +4,8 @@ import subprocess
 
 def test_docker_host_volume(mount_point):
     logger = logging.getLogger()
+    files = os.listdir(mount_point)
+    logger.debug(f"Files at the mount: {files}")
     logger.info(f"Checking if {mount_point} is writable.")
     # Try accessing the mount point
     try:
