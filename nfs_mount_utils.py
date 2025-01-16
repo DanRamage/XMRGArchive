@@ -2,7 +2,7 @@ import os
 import logging.config
 import subprocess
 
-def test_docker_host_volumn(mount_point):
+def test_docker_host_volume(mount_point):
     logger = logging.getLogger()
     # Try accessing the mount point
     try:
@@ -23,7 +23,7 @@ def check_mount_exists(mount_point):
     if not os.path.ismount(mount_point):
         logger.error(f"{mount_point} is not a valid mount point.")
         return False
-    return test_docker_host_volumn(mount_point)
+    return test_docker_host_volume(mount_point)
 
 
 def mount_nfs(server, remote_path, local_mount_point):

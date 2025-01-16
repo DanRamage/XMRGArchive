@@ -6,7 +6,7 @@ import geojson
 import logging.config
 from datetime import datetime, timedelta
 from dateutil.parser import parse as du_parse
-from nfs_mount_utils import check_mount_exists, mount_nfs
+from nfs_mount_utils import check_mount_exists, mount_nfs, test_docker_host_volume
 from archive_utilities import xmrg_archive_utilities
 
 SCRIPT_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
@@ -82,7 +82,8 @@ def main():
     if type(end_date) != datetime:
         end_date = du_parse(options.end_date)
     base_xmrg_directory = config_file.get("directories", "xmrg_data_directory")
-    if validate_mount(nfs_server, nfs_share, local_mount):
+    #if validate_mount(nfs_server, nfs_share, local_mount):
+    if test_docker_host_volume(local_mount):
         if options.missing_files_report:
             year_list = []
             missing_data_scan(base_xmrg_directory, start_date, end_date)
