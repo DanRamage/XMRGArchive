@@ -10,7 +10,7 @@ RUN groupadd -g ${GID} python_flask && \
     useradd -u ${UID} -g python_flask -m xeniaprod
 
 # Set the user to use when running the image
-USER myuser
+USER xeniaprod
 
 
 
