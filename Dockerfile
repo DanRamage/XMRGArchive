@@ -9,6 +9,11 @@ ARG GID=1004
 RUN groupadd -g ${GID} python_flask && \
     useradd -u ${UID} -g python_flask -m xeniaprod
 
+# Create directories as root and change ownership to the non-root user
+RUN mkdir -p /logfiles /xmrg_nfs && \
+    chown -R ${UID}:${GID} /logfiles /another_directory
+
+
 # Set the user to use when running the image
 USER xeniaprod
 
@@ -24,9 +29,5 @@ ADD archive_utilities.py .
 ADD nfs_mount_utils.py .
 
 COPY config/ config/
-
-RUN mkdir -p /logfiles
-RUN mkdir -p /xmrg_nfs
-
 
 ENTRYPOINT ["python", "./main.py"]
