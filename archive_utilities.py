@@ -2,7 +2,10 @@ import logging
 import os
 import glob
 import string
+import requests
 from datetime import datetime, timedelta
+import pytz
+
 from dateutil.relativedelta import relativedelta
 from nfs_mount_utils import check_mount_exists, mount_nfs
 
@@ -115,3 +118,49 @@ class xmrg_archive_utilities:
             else:
                 self._logger.info(f'Successfully downloaded xmrg file: {dl_xmrg_filename}')
         return
+
+    def check_file_timestamps(self, base_url, from_date, to_date):
+        #Get a list of the files we have.
+        date_time = from_date
+        local_tz = pytz.timezone('America/New_York')
+        gmt_tz = pytz.timezone('GMT')
+        while date_time < to_date:
+            year = date_time.year
+            month_abbreviation = date_time.strftime("%b")
+            current_file_list = self.file_list(year, month_abbreviation)
+            files_to_download = []
+            for current_file in current_file_list:
+                mtime = os.path.getmtime(current_file)
+                local_mod_time = datetime.fromtimestamp(mtime, local_tz)
+                try:
+                    directory, file_name = os.path.split(current_file)
+                    file_name, file_ext = os.path.splitext(file_name)
+                    remote_file_name = f"{file_name}.gz"
+                    remote_filename_url = os.path.join(base_url, remote_file_name)
+                    remote_file_info = requests.head(remote_filename_url)
+                    if remote_file_info.status_code == 200:
+                        remote_file_info.raise_for_status()  # Raise an exception if the request fails
+                        header_param = None
+                        if 'Last-Modified' in remote_file_info.headers:
+                            header_param = 'Last-Modified'
+                        elif 'Date' in remote_file_info.headers:
+                            header_param = 'Date'
+                        last_modified = remote_file_info.headers[header_param]
+                        remote_timestamp = datetime.strptime(last_modified, '%a, %d %b %Y %H:%M:%S %Z').astimezone(gmt_tz)
+                        if remote_timestamp > local_mod_time:
+                            files_to_download.append(file_name)
+                            self._logger.info(f"Remote file: {remote_file_name} more recent time stamp, "
+                                              f"adding to re-download.")
+                    else:
+                        self._logger.info(f"Remote file: {remote_file_name} no longer on remote server. HTML status "
+                                          f"code: {remote_file_info.status_code} Reason: {remote_file_info.reason}")
+                except Exception as e:
+                    self._logger.exception(e)
+
+            #Now we hit the endpoint where the remote system has the files stored and check their last modified time
+            #XMRg files get periodically updated due to QAQC during the day, so we try and get the latest version.
+            end_date_time = date_time + relativedelta(months=1)
+
+            date_time = end_date_time
+            if len(files_to_download) > 0:
+                self.download_files(base_url, files_to_download)

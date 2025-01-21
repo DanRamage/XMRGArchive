@@ -22,7 +22,7 @@ USER xeniaprod
 RUN pip install geojson
 RUN pip install dateparser
 RUN pip install git+https://github.com/DanRamage/xmrgprocessing.git
-RUN pip install pydevd_pycharm
+RUN pip install "pydevd_pycharm >=243.23654.74"
 
 ADD main.py .
 ADD archive_utilities.py .

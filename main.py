@@ -21,10 +21,15 @@ pydevd_pycharm.settrace('host.docker.internal',
                         stdoutToServer=True,
                         stderrToServer=True)
 logger = None
-def missing_data_scan(scan_directory, start_date, end_date):
+def missing_data_scan(base_url, scan_directory, start_date, end_date, check_file_datetimes):
     results = {}
     xmrg_utils = xmrg_archive_utilities(scan_directory)
     results = xmrg_utils.scan_for_missing_data(start_date, end_date)
+    #If we want to check if the source files are newer than what we downloaded.
+    if check_file_datetimes:
+        #check_file_timestamps(self, base_url, from_date, to_date)
+        xmrg_utils.check_file_timestamps(base_url, start_date, end_date)
+
     return results
 
 def validate_mount(server, remote_path, local_mount_point):
@@ -86,9 +91,10 @@ def main():
     if test_docker_host_volume(local_mount):
         if options.missing_files_report:
             year_list = []
-            missing_data_scan(base_xmrg_directory, start_date, end_date)
+            missing_data_scan(base_xmrg_directory, start_date, end_date, False, year_list)
         if options.fill_gaps:
-            results = missing_data_scan(base_xmrg_directory, start_date, end_date)
+            check_file_timestamps = True
+            results = missing_data_scan(base_url, base_xmrg_directory, start_date, end_date, check_file_timestamps)
             logger.info(f"The following files are missing between: {start_date.strftime('%Y-%m-%d %H:%M:%S''')} and "
                         f"{end_date.strftime('%Y-%m-%d %H:%M:%S''')}: {results}")
             fill_xmrg_gaps(base_url, base_xmrg_directory, results)
