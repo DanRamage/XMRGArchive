@@ -116,7 +116,10 @@ class xmrg_archive_utilities:
             existing_file_name = os.path.join(download_path, dl_xmrg_filename)
             if delete_if_exists and os.path.exists(existing_file_name):
                 self._logger.info(f"Deleting existing file: {existing_file_name}")
-                os.remove(existing_file_name)
+                try:
+                    os.remove(existing_file_name)
+                except Exception as e:
+                    self._logger.error(f"Failed to delete existing file: {existing_file_name}. {e}")
 
             xmrg_file = http_download_file(base_url, dl_xmrg_filename, download_path)
             if xmrg_file is None:
@@ -132,6 +135,8 @@ class xmrg_archive_utilities:
         oldest_date_at_repository = datetime.now() - timedelta(hours=repository_data_duration_hours)
         local_tz = pytz.timezone('America/New_York')
         gmt_tz = pytz.timezone('GMT')
+        self._logger.info(f"Checking updated files for {from_date.strftime('%Y-%m-%d %H:%M:%S')}"
+                          f" to {to_date.strftime('%Y-%m-%d %H:%M:%S')}")
         while date_time < to_date:
             year = date_time.year
             month_abbreviation = date_time.strftime("%b")
@@ -179,3 +184,4 @@ class xmrg_archive_utilities:
             date_time = end_date_time
             if len(files_to_download) > 0:
                 self.download_files(base_url, files_to_download, True)
+            self._logger.info(f"Finished checking updated files for {from_date} to {to_date}")

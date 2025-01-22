@@ -48,7 +48,7 @@ def fill_xmrg_gaps(base_url, base_archive_directory: str, files_to_fill: {}):
     xmrg_utils = xmrg_archive_utilities(base_archive_directory)
     for year in files_to_fill:
         for month in files_to_fill[year]:
-            xmrg_utils.download_files(base_url, files_to_fill[year][month])
+            xmrg_utils.download_files(base_url, files_to_fill[year][month], True)
 
 
 def main():
