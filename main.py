@@ -21,14 +21,19 @@ pydevd_pycharm.settrace('host.docker.internal',
                         stdoutToServer=True,
                         stderrToServer=True)
 logger = None
-def missing_data_scan(base_url, scan_directory, start_date, end_date, check_file_datetimes):
+def missing_data_scan(base_url,
+                      scan_directory,
+                      start_date,
+                      end_date,
+                      check_file_datetimes,
+                      repository_data_duration_hours):
     results = {}
     xmrg_utils = xmrg_archive_utilities(scan_directory)
     results = xmrg_utils.scan_for_missing_data(start_date, end_date)
     #If we want to check if the source files are newer than what we downloaded.
     if check_file_datetimes:
         #check_file_timestamps(self, base_url, from_date, to_date)
-        xmrg_utils.check_file_timestamps(base_url, start_date, end_date)
+        xmrg_utils.check_file_timestamps(base_url, start_date, end_date, repository_data_duration_hours)
 
     return results
 
@@ -80,6 +85,8 @@ def main():
 
     #Get HTTP download url
     base_url = config_file.get("xmrg", "download_url")
+    #Get the number of hours of historical data stored at the endpoint.
+    repository_data_duration_hours = config_file.getint("xmrg", "remote_repository_data_duration_hours")
     start_date = options.start_date
     if type(start_date) != datetime:
         start_date = du_parse(options.start_date)
@@ -88,13 +95,23 @@ def main():
         end_date = du_parse(options.end_date)
     base_xmrg_directory = config_file.get("directories", "xmrg_data_directory")
     #if validate_mount(nfs_server, nfs_share, local_mount):
+    check_file_timestamps = True
     if test_docker_host_volume(local_mount):
         if options.missing_files_report:
             year_list = []
-            missing_data_scan(base_xmrg_directory, start_date, end_date, False, year_list)
+            missing_data_scan(base_url,
+                              base_xmrg_directory,
+                              start_date,
+                              end_date,
+                              check_file_timestamps,
+                              repository_data_duration_hours)
         if options.fill_gaps:
-            check_file_timestamps = True
-            results = missing_data_scan(base_url, base_xmrg_directory, start_date, end_date, check_file_timestamps)
+            results = missing_data_scan(base_url,
+                                        base_xmrg_directory,
+                                        start_date,
+                                        end_date,
+                                        check_file_timestamps,
+                                        repository_data_duration_hours)
             logger.info(f"The following files are missing between: {start_date.strftime('%Y-%m-%d %H:%M:%S''')} and "
                         f"{end_date.strftime('%Y-%m-%d %H:%M:%S''')}: {results}")
             fill_xmrg_gaps(base_url, base_xmrg_directory, results)

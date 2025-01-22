@@ -119,9 +119,11 @@ class xmrg_archive_utilities:
                 self._logger.info(f'Successfully downloaded xmrg file: {dl_xmrg_filename}')
         return
 
-    def check_file_timestamps(self, base_url, from_date, to_date):
+    def check_file_timestamps(self, base_url, from_date, to_date, repository_data_duration_hours):
         #Get a list of the files we have.
         date_time = from_date
+        #We do not need to check the remote repository for any times older than this one.
+        oldest_date_at_repository = datetime.now() - timedelta(hours=repository_data_duration_hours)
         local_tz = pytz.timezone('America/New_York')
         gmt_tz = pytz.timezone('GMT')
         while date_time < to_date:
@@ -130,32 +132,35 @@ class xmrg_archive_utilities:
             current_file_list = self.file_list(year, month_abbreviation)
             files_to_download = []
             for current_file in current_file_list:
-                mtime = os.path.getmtime(current_file)
-                local_mod_time = datetime.fromtimestamp(mtime, local_tz)
-                try:
-                    directory, file_name = os.path.split(current_file)
-                    file_name, file_ext = os.path.splitext(file_name)
-                    remote_file_name = f"{file_name}.gz"
-                    remote_filename_url = os.path.join(base_url, remote_file_name)
-                    remote_file_info = requests.head(remote_filename_url)
-                    if remote_file_info.status_code == 200:
-                        remote_file_info.raise_for_status()  # Raise an exception if the request fails
-                        header_param = None
-                        if 'Last-Modified' in remote_file_info.headers:
-                            header_param = 'Last-Modified'
-                        elif 'Date' in remote_file_info.headers:
-                            header_param = 'Date'
-                        last_modified = remote_file_info.headers[header_param]
-                        remote_timestamp = datetime.strptime(last_modified, '%a, %d %b %Y %H:%M:%S %Z').astimezone(gmt_tz)
-                        if remote_timestamp > local_mod_time:
-                            files_to_download.append(file_name)
-                            self._logger.info(f"Remote file: {remote_file_name} more recent time stamp, "
-                                              f"adding to re-download.")
-                    else:
-                        self._logger.info(f"Remote file: {remote_file_name} no longer on remote server. HTML status "
-                                          f"code: {remote_file_info.status_code} Reason: {remote_file_info.reason}")
-                except Exception as e:
-                    self._logger.exception(e)
+                file_directory, file_name = os.path.split(current_file)
+                current_file_datetime = datetime.strptime(get_collection_date_from_filename(file_name), "%Y-%m-%dT%H:00:00")
+                if current_file_datetime > oldest_date_at_repository:
+                    mtime = os.path.getmtime(current_file)
+                    local_mod_time = datetime.fromtimestamp(mtime, local_tz)
+                    try:
+                        directory, file_name = os.path.split(current_file)
+                        file_name, file_ext = os.path.splitext(file_name)
+                        remote_file_name = f"{file_name}.gz"
+                        remote_filename_url = os.path.join(base_url, remote_file_name)
+                        remote_file_info = requests.head(remote_filename_url)
+                        if remote_file_info.status_code == 200:
+                            remote_file_info.raise_for_status()  # Raise an exception if the request fails
+                            header_param = None
+                            if 'Last-Modified' in remote_file_info.headers:
+                                header_param = 'Last-Modified'
+                            elif 'Date' in remote_file_info.headers:
+                                header_param = 'Date'
+                            last_modified = remote_file_info.headers[header_param]
+                            remote_timestamp = datetime.strptime(last_modified, '%a, %d %b %Y %H:%M:%S %Z').astimezone(gmt_tz)
+                            if remote_timestamp > local_mod_time:
+                                files_to_download.append(file_name)
+                                self._logger.info(f"Remote file: {remote_file_name} more recent time stamp, "
+                                                  f"adding to re-download.")
+                        else:
+                            self._logger.info(f"Remote file: {remote_file_name} no longer on remote server. HTML status "
+                                              f"code: {remote_file_info.status_code} Reason: {remote_file_info.reason}")
+                    except Exception as e:
+                        self._logger.exception(e)
 
             #Now we hit the endpoint where the remote system has the files stored and check their last modified time
             #XMRg files get periodically updated due to QAQC during the day, so we try and get the latest version.
