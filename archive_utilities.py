@@ -154,8 +154,11 @@ class xmrg_archive_utilities:
                             remote_timestamp = datetime.strptime(last_modified, '%a, %d %b %Y %H:%M:%S %Z').astimezone(gmt_tz)
                             if remote_timestamp > local_mod_time:
                                 files_to_download.append(file_name)
-                                self._logger.info(f"Remote file: {remote_file_name} more recent time stamp, "
-                                                  f"adding to re-download.")
+                                self._logger.info(f"Remote file: {remote_file_name} "
+                                                  f"{local_mod_time.strftime('%Y-%m-%d %H:%M:%S')} more recent "
+                                                  f"time stamp than remote file: "
+                                                  f"{remote_timestamp.strftime('%Y-%m-%d %H:%M:%S')} adding to "
+                                                  f"re-download.")
                         else:
                             self._logger.info(f"Remote file: {remote_file_name} no longer on remote server. HTML status "
                                               f"code: {remote_file_info.status_code} Reason: {remote_file_info.reason}")
