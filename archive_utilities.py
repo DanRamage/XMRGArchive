@@ -84,7 +84,7 @@ class xmrg_archive_utilities:
             date_time = end_date_time
         return results
 
-    def download_files(self, base_url: str, file_list: []):
+    def download_files(self, base_url: str, file_list: [], delete_if_exists: bool):
         '''
 
         :param base_url:
@@ -112,6 +112,12 @@ class xmrg_archive_utilities:
             #directory structure.
             dl_xmrg_filename = f"{xmrg_file}.{file_ext}"
             self._logger.info(f'Downloading xmrg file: {dl_xmrg_filename}')
+            #If the file exists, let's delete it and redownload.
+            existing_file_name = os.path.join(download_path, dl_xmrg_filename)
+            if delete_if_exists and os.path.exists(existing_file_name):
+                self._logger.info(f"Deleting existing file: {existing_file_name}")
+                os.remove(existing_file_name)
+
             xmrg_file = http_download_file(base_url, dl_xmrg_filename, download_path)
             if xmrg_file is None:
                 self._logger.error(f'Failed to download xmrg file: {dl_xmrg_filename}')
@@ -159,6 +165,7 @@ class xmrg_archive_utilities:
                                                   f"time stamp than remote file: "
                                                   f"{remote_timestamp.strftime('%Y-%m-%d %H:%M:%S')} adding to "
                                                   f"re-download.")
+
                         else:
                             self._logger.info(f"Remote file: {remote_file_name} no longer on remote server. HTML status "
                                               f"code: {remote_file_info.status_code} Reason: {remote_file_info.reason}")
@@ -171,4 +178,4 @@ class xmrg_archive_utilities:
 
             date_time = end_date_time
             if len(files_to_download) > 0:
-                self.download_files(base_url, files_to_download)
+                self.download_files(base_url, files_to_download, True)
