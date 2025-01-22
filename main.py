@@ -2,6 +2,8 @@ import os
 import glob
 import optparse
 import configparser
+import time
+
 import geojson
 import logging.config
 from datetime import datetime, timedelta
@@ -50,6 +52,7 @@ def fill_xmrg_gaps(base_url, base_archive_directory: str, files_to_fill: {}):
 
 
 def main():
+    start_time = time.time()
     parser = optparse.OptionParser()
 
     parser.add_option("--ConfigFile", dest="config_file",
@@ -116,7 +119,8 @@ def main():
                         f"{end_date.strftime('%Y-%m-%d %H:%M:%S''')}: {results}")
             fill_xmrg_gaps(base_url, base_xmrg_directory, results)
 
-
+    logger.info(f"Processing finished in {round(time.time() - start_time, 2)} seconds.")
+    logger.info("Logfile closed.")
     return
 
 if __name__ == "__main__":
