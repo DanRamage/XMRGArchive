@@ -84,9 +84,9 @@ def main():
     #Get NFS settings
     nfs_server = config_file.get("nfs", "nfs_server_ip")
     nfs_share = config_file.get("nfs", "nfs_directory")
-    local_mount = config_file.get("nfs", "local_mount_directory")
 
     #Get HTTP download url
+    local_mount = config_file.get("directories", "local_mount_directory")
     base_url = config_file.get("xmrg", "download_url")
     #Get the number of hours of historical data stored at the endpoint.
     repository_data_duration_hours = config_file.getint("xmrg", "remote_repository_data_duration_hours")

@@ -87,9 +87,10 @@ class xmrg_archive_utilities:
     def download_files(self, base_url: str, file_list: [], delete_if_exists: bool):
         '''
 
-        :param base_url:
-        :param download_directory:
-        :param file_list:
+        :param base_url: The url we use to build the download URL for the data file.
+        :param download_directory: Location to store the downloaded data file.
+        :param file_list: List of files to download.
+        :param delete_if_exists: If the file we want to download already exists, we delete it before downloading.
         :return:
         '''
 
