@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "xmrgarchivedocker"
+version = "0.1.0"
+description = ""
+authors = ["DANRAMAGE <ChiefDan@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+geojson = "^3.2.0"
+dateparser = "^1.2.0"
+xmrgprocessing = {git = "https://github.com/DanRamage/xmrgprocessing.git"}
+pydevd-pycharm = "^243.23654.74"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
