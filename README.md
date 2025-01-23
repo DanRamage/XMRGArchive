@@ -54,9 +54,9 @@ Two volumes must be provided.<br>
 2) A directory to write the logfile. This can be any writable directory on the Docker host. <br>
 
 
-** Sample Build Command ** <br>
+**Sample Build Command** <br>
     sudo docker build -t xmrg-archive-docker .
     <br>
-** Sample Run Command **<br>
+**Sample Run Command**<br>
     docker run -v /mnt/xmrg_nfs:/xmrg_nfs -v /tmp:/logfiles xmrg-archive-docker --ConfigFile=/config/xmrg_archive_config_docker.ini --LogConfigFile=/config/xmrg_archive_logging_docker.conf --FillGaps
     <br>
