@@ -48,6 +48,12 @@ in the logging .conf file should be relative to that.
 
 
 # Docker configuration
+<br>
+Two volumes must be provided.<br>
+1) The directory to the XMRG archive on the host machine. Normally this is the mount point for NFS.<br>
+2) A directory to write the logfile. This can be any writable directory on the Docker host. <br>
+
+
 ** Sample Build Command ** <br>
     sudo docker build -t xmrg-archive-docker .
     <br>
