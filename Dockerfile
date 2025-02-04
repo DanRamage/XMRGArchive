@@ -34,4 +34,4 @@ COPY . /app
 
 COPY config/ ./app/config/
 
-ENTRYPOINT ["python", "./main.py"]
+ENTRYPOINT ["python", "main.py"]
