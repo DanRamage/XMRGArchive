@@ -17,7 +17,8 @@ RUN mkdir -p /logfiles /xmrg_nfs && \
 # Set the user to use when running the image
 USER xeniaprod
 
-
+# Set the working directory in the container
+WORKDIR /app
 
 RUN pip install geojson
 RUN pip install dateparser
@@ -28,6 +29,9 @@ ADD main.py .
 ADD archive_utilities.py .
 ADD nfs_mount_utils.py .
 
-COPY config/ config/
+# Copy the current directory contents into the container at /app
+COPY . /app
+
+COPY config/ ./app/config/
 
 ENTRYPOINT ["python", "./main.py"]
