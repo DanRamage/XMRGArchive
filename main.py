@@ -10,7 +10,7 @@ from nfs_mount_utils import check_mount_exists, mount_nfs, test_docker_host_volu
 from archive_utilities import xmrg_archive_utilities
 
 SCRIPT_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
-
+LOGFILES_DIRECTORY = "./logfiles"
 '''
 import sys
 sys.path.append("./debug/pydevd-pycharm.egg")
@@ -99,6 +99,9 @@ def main():
     check_file_timestamps = True
     files = os.listdir("./")
     logger.debug(f"Files at root: {files}")
+    #Check if the logfiles volume is writable
+    if not test_docker_host_volume(LOGFILES_DIRECTORY):
+        logger.error(f"Logfile directory: {LOGFILES_DIRECTORY} is not writable.")
 
     if test_docker_host_volume(local_mount):
         if options.missing_files_report:
