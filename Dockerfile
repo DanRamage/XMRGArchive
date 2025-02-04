@@ -32,6 +32,6 @@ ADD nfs_mount_utils.py .
 # Copy the current directory contents into the container at /app
 COPY . /app
 
-COPY config/ ./app/config/
+COPY config/ config/
 
 ENTRYPOINT ["python", "main.py"]
