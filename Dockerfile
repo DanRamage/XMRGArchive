@@ -1,6 +1,9 @@
 FROM python:3.11
 LABEL authors="danramage"
 
+# Set the working directory in the container
+WORKDIR /app
+
 #We are writing out to a NAS or other storage device via an NFS mount. We need to set
 #The UID and GID of the docker to be one that can access the mount.
 ARG UID=1001
@@ -16,9 +19,6 @@ RUN mkdir -p /logfiles /xmrg_nfs && \
 
 # Set the user to use when running the image
 USER xeniaprod
-
-# Set the working directory in the container
-WORKDIR /app
 
 RUN pip install geojson
 RUN pip install dateparser
