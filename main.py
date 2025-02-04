@@ -1,10 +1,8 @@
 import os
-import glob
 import optparse
 import configparser
 import time
 
-import geojson
 import logging.config
 from datetime import datetime, timedelta
 from dateutil.parser import parse as du_parse
@@ -12,9 +10,8 @@ from nfs_mount_utils import check_mount_exists, mount_nfs, test_docker_host_volu
 from archive_utilities import xmrg_archive_utilities
 
 SCRIPT_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
-LOGFILES_DIRECTORY = ".\logfiles"
 
-
+'''
 import sys
 sys.path.append("./debug/pydevd-pycharm.egg")
 import pydevd_pycharm
@@ -22,6 +19,7 @@ pydevd_pycharm.settrace('host.docker.internal',
                         port=4200,
                         stdoutToServer=True,
                         stderrToServer=True)
+'''
 logger = None
 def missing_data_scan(base_url,
                       scan_directory,
@@ -99,6 +97,9 @@ def main():
     base_xmrg_directory = config_file.get("directories", "xmrg_data_directory")
     #if validate_mount(nfs_server, nfs_share, local_mount):
     check_file_timestamps = True
+    files = os.listdir("./")
+    logger.debug(f"Files at root: {files}")
+
     if test_docker_host_volume(local_mount):
         if options.missing_files_report:
             year_list = []
