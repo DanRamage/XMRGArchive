@@ -13,8 +13,8 @@ RUN groupadd -g ${GID} python_flask && \
     useradd -u ${UID} -g python_flask -m xeniaprod
 
 # Create directories as root and change ownership to the non-root user
-RUN mkdir -p /logfiles /xmrg_nfs && \
-    chown -R ${UID}:${GID} /logfiles /xmrg_nfs
+RUN mkdir -p logfiles xmrg_nfs && \
+    chown -R ${UID}:${GID} logfiles xmrg_nfs
 
 
 # Set the user to use when running the image
