@@ -10,7 +10,7 @@ from nfs_mount_utils import check_mount_exists, mount_nfs, test_docker_host_volu
 from archive_utilities import xmrg_archive_utilities
 
 SCRIPT_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
-LOGFILES_DIRECTORY = "./logfiles"
+LOGFILES_DIRECTORY = "logfiles"
 '''
 import sys
 sys.path.append("./debug/pydevd-pycharm.egg")
