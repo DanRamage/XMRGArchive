@@ -20,14 +20,13 @@ pydevd_pycharm.settrace('host.docker.internal',
                         stdoutToServer=True,
                         stderrToServer=True)
 '''
-logger = None
 def missing_data_scan(base_url,
                       scan_directory,
                       start_date,
                       end_date,
                       check_file_datetimes,
                       repository_data_duration_hours):
-    results = {}
+
     xmrg_utils = xmrg_archive_utilities(scan_directory)
     results = xmrg_utils.scan_for_missing_data(start_date, end_date)
     #If we want to check if the source files are newer than what we downloaded.
@@ -80,8 +79,8 @@ def main():
     logger.info("Log file opened.")
 
     #Get NFS settings
-    nfs_server = config_file.get("nfs", "nfs_server_ip")
-    nfs_share = config_file.get("nfs", "nfs_directory")
+    #nfs_server = config_file.get("nfs", "nfs_server_ip")
+    #nfs_share = config_file.get("nfs", "nfs_directory")
 
     #Get HTTP download url
     local_mount = config_file.get("directories", "local_mount_directory")
@@ -105,7 +104,6 @@ def main():
 
     if test_docker_host_volume(local_mount):
         if options.missing_files_report:
-            year_list = []
             missing_data_scan(base_url,
                               base_xmrg_directory,
                               start_date,
