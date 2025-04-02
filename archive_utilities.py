@@ -57,31 +57,39 @@ class xmrg_archive_utilities:
         date_time = from_date
         #Build a list of the files we should have for a given date range.
         complete_file_list = self.build_file_list_for_date_range(from_date, to_date, "")
-        complete_file_set = set(complete_file_list)
-        while date_time < to_date:
-            year = date_time.year
-            month_str = date_time.strftime("%b")
-            #Get all the files available for the given year/month
-            file_list = self.file_list(year, month_str)
-            #Get file names only
-            file_name_list = []
-            for file in file_list:
-                file_dir, file_name = os.path.split(file)
-                #We just want the name of the file with no extensions.
-                file_name, exten = os.path.splitext(file_name)
-                file_name_list.append(file_name)
-            end_date_time = date_time + relativedelta(months=1)
-            #end_date_time = date_time + relativedelta(hours=1)
+        #Divide up the file list by year and month.
+        sorted_file_list = {}
+        for file in complete_file_list:
+            file_date = datetime.strptime(get_collection_date_from_filename(file), "%Y-%m-%dT%H:00:00")
+            if file_date.year not in sorted_file_list:
+                sorted_file_list[file_date.year] = {}
+            month_str = file_date.strftime("%b")
+            if month_str not in sorted_file_list[file_date.year]:
+                sorted_file_list[file_date.year][month_str] = []
+            sorted_file_list[file_date.year][month_str].append(file)
+        for year in sorted_file_list:
+            for month_str in sorted_file_list[year]:
+                #Get all the files available for the given year/month
+                file_list = self.file_list(year, month_str)
+                #Get file names only
+                file_name_list = []
+                for file in file_list:
+                    file_dir, file_name = os.path.split(file)
+                    #We just want the name of the file with no extensions.
+                    file_name, exten = os.path.splitext(file_name)
+                    file_name_list.append(file_name)
 
-            archive_file_set = set(file_name_list)
-            missing_files = complete_file_set.difference(archive_file_set)
-            if len(missing_files):
-                if year not in results:
-                    results[year] = {}
-                if month_str not in results[year]:
-                    results[year][month_str] = []
-                results[year][month_str].extend(list(missing_files))
-            date_time = end_date_time
+                #Create a set from the file list we have in the archive, a set from the files we expect
+                #then we can use the difference function to find out what is not in the archive.
+                archive_file_set = set(file_name_list)
+                expected_file_list = set(sorted_file_list[year][month_str])
+                missing_files = expected_file_list.difference(archive_file_set)
+                if len(missing_files):
+                    if year not in results:
+                        results[year] = {}
+                    if month_str not in results[year]:
+                        results[year][month_str] = []
+                    results[year][month_str].extend(list(missing_files))
         return results
 
     def download_files(self, base_url: str, file_list: [], delete_if_exists: bool):
