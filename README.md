@@ -18,9 +18,9 @@ There is a periodic QAQC that goes on with the remote data.</p>
 **--MissingFilesReport** - If set, this flag will produce a report of what files are missing for the 
     date range in the StartDate and EndDate parameters below.
 
-**--StartDate** - Date/Time string to begin our operations.
+**--StartDate** - Date/Time string to begin our operations. If not provided, this will be 72 hours from the now time.
 
-**--EndDate** - Date/Time string to end our operations.
+**--EndDate** - Date/Time string to end our operations. If not provided, will be the now time.
 
 ## Configuration File(--ConfigFile)
 The ConfigFile parameter loads an ini file that has the following entries.
