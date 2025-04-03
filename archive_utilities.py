@@ -139,7 +139,6 @@ class xmrg_archive_utilities:
 
     def check_file_timestamps(self, base_url, from_date, to_date, repository_data_duration_hours):
         #Get a list of the files we have.
-        date_time = from_date
         #We do not need to check the remote repository for any times older than this one.
         oldest_date_at_repository = datetime.now() - timedelta(hours=repository_data_duration_hours)
         local_tz = pytz.timezone('America/New_York')
@@ -157,7 +156,6 @@ class xmrg_archive_utilities:
             year_months.append(date_time)
             date_time += relativedelta(months=1)
 
-        #while date_time < to_date:
         for date_time in year_months:
             year = date_time.year
             month_abbreviation = date_time.strftime("%b")
@@ -199,11 +197,6 @@ class xmrg_archive_utilities:
                     except Exception as e:
                         self._logger.exception(e)
 
-            #Now we hit the endpoint where the remote system has the files stored and check their last modified time
-            #XMRg files get periodically updated due to QAQC during the day, so we try and get the latest version.
-            #end_date_time = date_time + relativedelta(months=1)
-
-            #date_time = end_date_time
         if len(files_to_download) > 0:
             self.download_files(base_url, files_to_download, True)
         self._logger.info(f"Finished checking updated files for {from_date} to {to_date}")
