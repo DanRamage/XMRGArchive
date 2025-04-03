@@ -163,6 +163,7 @@ class xmrg_archive_utilities:
                         remote_file_name = f"{file_name}.gz"
                         remote_filename_url = os.path.join(base_url, remote_file_name)
                         remote_file_info = requests.head(remote_filename_url)
+                        self._logger.info(f"Retrieving info for remote file: {remote_file_name}")
                         if remote_file_info.status_code == 200:
                             remote_file_info.raise_for_status()  # Raise an exception if the request fails
                             header_param = None
