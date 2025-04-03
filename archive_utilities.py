@@ -146,7 +146,19 @@ class xmrg_archive_utilities:
         gmt_tz = pytz.timezone('GMT')
         self._logger.info(f"Checking updated files for {from_date.strftime('%Y-%m-%d %H:%M:%S')}"
                           f" to {to_date.strftime('%Y-%m-%d %H:%M:%S')}")
-        while date_time < to_date:
+        # Get a list of the months between the 2 dates. The data in the archive is stored in a \Year\Month
+        # directory structure
+        year_months = []
+        # Set both dates to the first day of their respective months
+        start_date = datetime(from_date.year, from_date.month, 1)
+        end_date = datetime(to_date.year, to_date.month, 1)
+        date_time = start_date
+        while date_time <= end_date:
+            year_months.append(date_time)
+            date_time += relativedelta(months=1)
+
+        #while date_time < to_date:
+        for date_time in year_months:
             year = date_time.year
             month_abbreviation = date_time.strftime("%b")
             current_file_list = self.file_list(year, month_abbreviation)
@@ -176,9 +188,9 @@ class xmrg_archive_utilities:
                             if remote_timestamp > local_mod_time:
                                 files_to_download.append(file_name)
                                 self._logger.info(f"Remote file: {remote_file_name} "
-                                                  f"{local_mod_time.strftime('%Y-%m-%d %H:%M:%S')} more recent "
-                                                  f"time stamp than remote file: "
-                                                  f"{remote_timestamp.strftime('%Y-%m-%d %H:%M:%S')} adding to "
+                                                  f"{remote_timestamp.strftime('%Y-%m-%d %H:%M:%S')} more recent "
+                                                  f"time stamp than local archive file: "
+                                                  f"{local_mod_time.strftime('%Y-%m-%d %H:%M:%S')} adding to "
                                                   f"re-download.")
 
                         else:
@@ -189,9 +201,9 @@ class xmrg_archive_utilities:
 
             #Now we hit the endpoint where the remote system has the files stored and check their last modified time
             #XMRg files get periodically updated due to QAQC during the day, so we try and get the latest version.
-            end_date_time = date_time + relativedelta(months=1)
+            #end_date_time = date_time + relativedelta(months=1)
 
-            date_time = end_date_time
-            if len(files_to_download) > 0:
-                self.download_files(base_url, files_to_download, True)
-            self._logger.info(f"Finished checking updated files for {from_date} to {to_date}")
+            #date_time = end_date_time
+        if len(files_to_download) > 0:
+            self.download_files(base_url, files_to_download, True)
+        self._logger.info(f"Finished checking updated files for {from_date} to {to_date}")
