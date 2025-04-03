@@ -156,7 +156,7 @@ class xmrg_archive_utilities:
                 current_file_datetime = datetime.strptime(get_collection_date_from_filename(file_name), "%Y-%m-%dT%H:00:00")
                 if current_file_datetime > oldest_date_at_repository:
                     mtime = os.path.getmtime(current_file)
-                    local_mod_time = datetime.fromtimestamp(mtime, local_tz)
+                    local_mod_time = datetime.fromtimestamp(mtime, gmt_tz)
                     try:
                         directory, file_name = os.path.split(current_file)
                         file_name, file_ext = os.path.splitext(file_name)
