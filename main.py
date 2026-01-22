@@ -70,6 +70,10 @@ def main():
                       help="Date to start processing.", default=datetime.now() - timedelta(hours=72))
     parser.add_option("--EndDate", dest="end_date",
                       help="Date to start processing.", default=datetime.now())
+    parser.add_option("--ArchiveInfoReport", dest="archive_info_report",
+                      help="Flag that goes through the archive creating statistics.", action="store_true", default=False)
+    parser.add_option("--ArchiveInfoDirectory", dest="archive_info_directory",
+                      help="Directory to save the archive stats to.", default=None)
 
     (options, args) = parser.parse_args()
 
@@ -123,6 +127,10 @@ def main():
             logger.info(f"The following files are missing between: {start_date.strftime('%Y-%m-%d %H:%M:%S''')} and "
                         f"{end_date.strftime('%Y-%m-%d %H:%M:%S''')}: {results}")
             fill_xmrg_gaps(base_url, base_xmrg_directory, results)
+        if options.archive_info_report:
+            xmrg_utils = xmrg_archive_utilities(base_xmrg_directory)
+            archive_info_file = os.path.join(options.archive_info_directory, "archive_info.json")
+            xmrg_utils.create_archive_information(archive_info_file, None, None)
 
     logger.info(f"Processing finished in {round(time.time() - start_time, 2)} seconds.")
     logger.info("Logfile closed.")

@@ -5,9 +5,9 @@ import string
 import requests
 from datetime import datetime, timedelta
 import pytz
+import json
 
 from dateutil.relativedelta import relativedelta
-from nfs_mount_utils import check_mount_exists, mount_nfs
 
 from xmrgprocessing.xmrg_utilities import build_filename, get_collection_date_from_filename
 from xmrgprocessing.xmrg_utilities import http_download_file
@@ -200,3 +200,58 @@ class xmrg_archive_utilities:
         if len(files_to_download) > 0:
             self.download_files(base_url, files_to_download, True)
         self._logger.info(f"Finished checking updated files for {from_date} to {to_date}")
+
+    def create_archive_information(self, output_filename: str, start_date: datetime|None, end_date: datetime|None):
+        #Get a listing of the directories which should all be years.
+        year_list = os.listdir(self._parent_directory)
+        year_list.sort()
+        archive_results = {}
+        now_datetime = datetime.utcnow()
+        for year in year_list:
+            try:
+                self._logger.info(f"Creating archive information for {year}.")
+                if int(year):
+                    archive_results[year] = {}
+                    for month in range(1, 13):
+                        if int(year) == now_datetime.year and month == now_datetime.month:
+                            break
+                        else:
+                            start_search_date = datetime(year=int(year), month=month, day=1, hour=0, minute=0, second=0)
+                            end_search_date = start_search_date + relativedelta(months=1)
+                            days_in_month = (end_search_date - start_search_date).days
+                            number_of_hourly_files_in_month = days_in_month * 24
+                            #Build a list of the files we should have
+                            files_for_the_month = self.build_file_list_for_date_range(start_search_date, end_search_date, "")
+                            month_abbreviation = start_search_date.strftime("%b")
+                            archive_results[year][month_abbreviation] = {
+                                'file_count': len(files_for_the_month),
+                                'number_of_files_missing': 0,
+                                'files_missing': []
+                            }
+                            path_to_check = self._data_path_template.substitute(year=year, month=month_abbreviation)
+                            path_to_check = os.path.join(self._parent_directory, path_to_check)
+                            files_in_archive_for_month = os.listdir(path_to_check)
+                            if len(files_in_archive_for_month) != len(files_for_the_month):
+                                #We're missing files in the archive.
+                                set_for_archive = set()
+                                for archive_file in files_in_archive_for_month:
+                                    base_directory, filename = os.path.split(archive_file)
+                                    filename, file_ext = os.path.splitext(filename)
+                                    set_for_archive.add(filename)
+                                set_for_files_for_month = set(files_for_the_month)
+                                missing_archive_files = set_for_files_for_month.difference(set_for_archive)
+                                #Currently it's possible the archive folder has the ".gz" files and the uncompressed files.
+                                #So if our set difference doesn't have anything, we're not missing files.
+                                if len(missing_archive_files) > 0:
+                                    archive_results[year][month_abbreviation]['number_of_files_missing'] = (
+                                        len(missing_archive_files))
+                                    archive_results[year][month_abbreviation]['files_missing'] = (
+                                        list(missing_archive_files))
+
+
+            except ValueError as e:
+                self._logger.exception(f"Failed to parse year: {year}. {e}")
+
+        with open(output_filename, "w") as output_file:
+            output_file.write(json.dumps(archive_results))
+        return
